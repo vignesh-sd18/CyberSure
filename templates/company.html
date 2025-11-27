@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Company Verification - CyberSure{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<style>
+    :root{--primary:#1e40af;--primary-light:#3b82f6;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--text-primary:#1f2937;--text-secondary:#6b7280;--surface:#f9fafb;}
+    .verification-container{max-width:1000px;margin:30px auto;background:var(--surface);padding:2rem;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);color:var(--text-primary);}
+    .page-header{text-align:center;margin-bottom:2rem;padding:2rem 0;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:white;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1);}
+    .page-header h2{font-weight:700;margin-bottom:1rem;font-size:2rem;}
+    .page-header p{color:rgba(255,255,255,.9);max-width:600px;margin:0 auto;}
+    .form-section{background:white;padding:2rem;border-radius:12px;margin-top:2rem;box-shadow:0 4px 15px rgba(0,0,0,.05);}
+    .form-section-header{display:flex;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid rgba(0,0,0,.1);}
+    .form-section-header i{font-size:1.5rem;color:var(--primary);margin-right:1rem;}
+    .form-section-header h3{font-size:1.25rem;margin:0;color:var(--text-primary);}
+    .form-row{display:flex;gap:1.5rem;margin-bottom:1.5rem;}
+    .form-group{flex:1;display:flex;flex-direction:column;}
+    .form-group label{margin-bottom:.5rem;font-weight:500;color:var(--text-secondary);font-size:.9rem;}
+    .form-group input{padding:.75rem 1rem;border-radius:8px;border:1px solid rgba(0,0,0,.1);outline:none;font-size:1rem;background:white;color:var(--text-primary);transition:all .3s ease;}
+    .form-group input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,58,138,.1);}
+    .form-group .help-text{font-size:.8rem;color:var(--text-secondary);margin-top:.5rem;}
+    .submit-btn{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);color:white;border:none;padding:1rem 2rem;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;transition:all .3s ease;width:100%;margin-top:2rem;display:flex;align-items:center;justify-content:center;gap:.5rem;}
+    .submit-btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(30,58,138,.3);}
+    .submit-btn:disabled{opacity:.7;cursor:not-allowed;transform:none;}
+    .upload-dropzone{border:2px dashed rgba(0,0,0,.2);background:#f8f9fa;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s ease;}
+    .upload-dropzone:hover,.upload-dropzone.dragover{border-color:var(--primary);background:rgba(30,58,138,.05);}
+    .upload-dropzone i{font-size:2.5rem;color:var(--primary);margin-bottom:1rem;}
+    .upload-dropzone .btn-link{color:var(--primary);text-decoration:underline;font-weight:500;}
+    #dz-filename{font-weight:600;color:var(--text-primary);margin-top:1rem;}
+    #dz-preview img{max-height:120px;border-radius:8px;margin-top:1rem;border:1px solid rgba(0,0,0,.1);}
+    .progress{height:8px;background:rgba(0,0,0,.1);border-radius:4px;overflow:hidden;margin-top:1rem;}
+    .progress-bar{background:var(--success);width:0%;transition:width .3s ease;}
+    .phish-result-card{background:white;padding:1.5rem;border-radius:12px;margin-top:2rem;box-shadow:0 4px 15px rgba(0,0,0,.05);border-left:4px solid var(--warning);}
+    .detection-status{padding:.5rem 1rem;border-radius:8px;font-weight:600;display:inline-block;margin:.5rem 0;}
+    .detection-status.danger{background:rgba(239,68,68,.1);color:var(--danger);}
+    .detection-status.safe{background:rgba(16,185,129,.1);color:var(--success);}
+    .alert{margin-top:1rem;padding:1rem;border-radius:8px;}
+    .alert-success{background:rgba(16,185,129,.1);color:var(--success);border:1px solid rgba(16,185,129,.3);}
+    .alert-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3);}
+    @media (max-width:768px){.form-row{flex-direction:column;}}
+</style>
+
+<div class="verification-container" data-step="{{ step }}">
+    <div class="page-header">
+        <h2>Company Verification</h2>
+        <p>Securely verify your company identity using blockchain-verified documents.</p>
+    </div>
+
+    <!-- Email Step -->
+    {% if step == 'email' %}
+    <form method="POST" class="form-section">
+        <div class="form-section-header"><h3>Email Verification</h3></div>
+        <div class="form-group">
+            <label for="email">Registered Email</label>
+            <input type="email" name="email" id="email" placeholder="you@company.com" value="{{ current_user.email }}" required>
+            <div class="help-text">We’ll send a 6-digit OTP</div>
+        </div>
+        <button type="submit" class="submit-btn">Send OTP</button>
+    </form>
+    {% endif %}
+
+    <!-- OTP Step -->
+    {% if step == 'otp' %}
+    <form method="POST" class="form-section">
+        <div class="form-section-header"><h3>Enter OTP</h3></div>
+        <div class="form-group">
+            <label for="otp">6-digit OTP</label>
+            <input type="text" name="otp" id="otp" maxlength="6" placeholder="••••••" class="text-center" required>
+            <div class="help-text">Check your email</div>
+        </div>
+        <button type="submit" class="submit-btn">Verify OTP</button>
+    </form>
+    {% endif %}
+
+    <!-- Blockchain Upload Step -->
+    {% if step == 'send_blockchain' %}
+
+    <!-- Phishing Detection Result -->
+    {% if phish_info %}
+    <div class="phish-result-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Phishing Detection</h5>
+            <small class="text-muted">{{ phish_info.checked_at or 'Just now' }}</small>
+        </div>
+        <div class="detection-status {% if phish_info.detected %}danger{% else %}safe{% endif %}">
+            <strong>{{ 'Phishing Detected' if phish_info.detected else 'No Threats Found' }}</strong>
+        </div>
+        {% if phish_info.document_filename %}
+        <p class="mb-1"><strong>Document:</strong> <code>{{ phish_info.document_filename }}</code></p>
+        {% endif %}
+        {% if phish_info.document_hash %}
+        <p class="mb-1"><strong>Hash:</strong> <code>{{ phish_info.document_hash }}</code></p>
+        {% endif %}
+        {% if phish_info.reasons %}
+        <ul class="mb-2 ps-3">{% for r in phish_info.reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if phish_info.detected %}
+        <div class="d-flex gap-2 mt-3">
+            <form method="POST"><input type="hidden" name="force_send" value="1">
+                <button type="submit" class="btn btn-danger btn-sm">Force Send</button>
+            </form>
+            <form method="POST"><input type="hidden" name="action" value="restart">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Restart</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Upload Form (AJAX) -->
+    <form method="POST" enctype="multipart/form-data" id="blockchain-form" action="{{ url_for('company') }}" class="form-section">
+        <div class="form-section-header"><h3>Company Details</h3></div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="company_name">Company Name</label>
+                <input type="text" name="company_name" id="company_name" placeholder="Acme Corp Ltd." required>
+                <div class="help-text">Legal name</div>
+            </div>
+            <div class="form-group">
+                <label for="company_address">Company Address</label>
+                <input type="text" name="company_address" id="company_address" placeholder="123 Business St, Mumbai" required>
+                <div class="help-text">Registered address</div>
+            </div>
+        </div>
+
+        <div class="form-section-header mt-4"><h3>Upload Document</h3></div>
+        <div class="form-group">
+            <div id="upload-dropzone" class="upload-dropzone">
+                <input type="file" name="document" id="document" accept=".pdf,.jpg,.jpeg,.png" required style="position:absolute;left:-9999px;">
+                <div class="dz-content">
+                    <p class="mb-1 fw-bold">
+                        Drag & drop or <button type="button" id="dz-browse" class="btn btn-link p-0 align-baseline">browse</button>
+                    </p>
+                    <p class="text-muted small">PDF, JPG, PNG • Max 10 MB</p>
+                    <div id="dz-filename" class="mt-3"></div>
+                    <div id="dz-preview" class="mt-3"></div>
+                    <div id="dz-progress" class="progress mt-3 d-none">
+                        <div id="dz-progress-bar" class="progress-bar" role="progressbar" style="width:0%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="help-text">Upload Certificate of Incorporation, GST, etc.</div>
+        </div>
+
+        <div id="upload-result" class="mt-3"></div>
+
+        <button type="submit" id="send-blockchain" class="submit-btn">
+            Send to Blockchain
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+{% endblock %}
+{% endblock %}

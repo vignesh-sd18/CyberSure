@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Available Policies - Cyber Insurance{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="text-primary fw-bold mb-4 text-center">Available Policies</h2>
+
+    {% if entries %}
+    <div class="row g-4 mt-5">
+        {% for entry in entries %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-secondary fw-bold">{{ entry.policy_name }}</h5>
+                    <p class="text-muted mb-2"><strong>Account Policy:</strong> {{ entry.account_policy }}</p>
+                    <p class="card-text flex-grow-1">{{ entry.description or 'No description provided.' }}</p>
+                    <p class="mb-1"><strong>Start Risk:</strong> <span class="text-success">{{ entry.start_risk
+                            }}</span></p>
+                    <p class="mb-1"><strong>End Risk:</strong> <span class="text-danger">{{ entry.end_risk }}</span></p>
+                    <p class="text-muted small mb-3">Date: {{ entry.date.strftime('%d %b %Y') }}</p>
+
+                    <!-- Book button -->
+                    <form method="POST" class="mt-auto">
+                        <input type="hidden" name="policy_name" value="{{ entry.policy_name }}">
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="fa fa-check-circle me-2"></i> Book Policy
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">No policies available at the moment.</p>
+    {% endif %}
+
+</div>
+
+<style>
+    body {
+        background-color: #f7f9fc;
+    }
+
+    .card {
+        border-radius: 0.8rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

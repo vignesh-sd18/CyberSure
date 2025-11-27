@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Policy Management - CyberSure{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+    :root{
+        --primary:#1e40af;--primary-light:#3b82f6;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+        --text-primary:#1f2937;--text-secondary:#6b7280;--surface:#f9fafb;
+    }
+
+    .admin-container { max-width: 1400px; margin: 30px auto; padding: 2rem; background: var(--surface); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+    .page-header { text-align: center; margin-bottom: 2rem; padding: 2rem 0; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; border-radius: 12px; }
+    .page-header h2 { font-weight: 700; font-size: 2rem; }
+    .page-header p { color: rgba(255,255,255,.9); }
+
+    .stat-card {
+        background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,.05); transition: transform .2s;
+    }
+    .stat-card:hover { transform: translateY(-5px); }
+    .icon-circle { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+    .info-section { background: white; padding: 2rem; border-radius: 12px; margin-top: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,.05); }
+    .info-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,.1); }
+    .info-section-header h3 { font-size: 1.25rem; margin: 0; }
+
+    .data-table th { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 1rem; font-weight: 600; font-size: .9rem; }
+    .data-table td { padding: 1rem; }
+    .data-table tr:hover { background: #f8f9fa; }
+
+    .progress { height: 6px; background: #e9ecef; border-radius: 10px; }
+    .progress-bar { border-radius: 10px; }
+
+    .badge { padding: .35rem .75rem; border-radius: 50px; font-size: .8rem; font-weight: 600; }
+
+    @media (max-width: 768px) {
+        .stat-card { margin-bottom: 1rem; }
+        .data-table { font-size: .9rem; }
+    }
+</style>
+
+<div class="admin-container">
+    <div class="page-header">
+        <h2>Policy Management</h2>
+        <p>Monitor and analyze all insurance policies on the platform</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="mb-0">Welcome, <strong>{{ current_user.username }}</strong></p>
+        <span class="badge bg-primary-soft text-primary px-3 py-1 rounded-pill">{{ policies|length }} Policies</span>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-muted">Total Coverage</h6>
+                        <h3 class="mb-0">₹{{ "{:,.0f}".format(policies | sum(attribute='coverage_amount')) }}</h3>
+                    </div>
+                    <div class="icon-circle bg-primary"><i class="fas fa-shield-alt text-white"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-muted">Total Premium</h6>
+                        <h3 class="mb-0">₹{{ "{:,.0f}".format(policies | sum(attribute='premium_amount')) }}</h3>
+                    </div>
+                    <div class="icon-circle bg-success"><i class="fas fa-chart-line text-white"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-muted">Avg. Risk Score</h6>
+                        <h3 class="mb-0">{{ (policies | sum(attribute='risk_score') / policies|length if policies else 0) | round(1) }}%</h3>
+                    </div>
+                    <div class="icon-circle bg-warning"><i class="fas fa-exclamation-triangle text-white"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h6 class="text-muted">High Risk</h6>
+                        <h3 class="mb-0">{{ policies | selectattr('risk_level', 'equalto', 'High') | list | length }}</h3>
+                    </div>
+                    <div class="icon-circle bg-danger"><i class="fas fa-radiation text-white"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policies Table -->
+    <div class="info-section">
+        <div class="info-section-header">
+            <h3>All Policies</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Coverage</th>
+                        <th>Premium</th>
+                        <th>Deductible</th>
+                        <th>Occupation</th>
+                        <th>Risk Score</th>
+                        <th>Risk Level</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for policy in policies %}
+                    <tr>
+                        <td><strong class="text-primary">#{{ policy.id }}</strong></td>
+                        <td>₹{{ "{:,.0f}".format(policy.coverage_amount) }}</td>
+                        <td><span class="badge bg-success">₹{{ "{:,.0f}".format(policy.premium_amount) }}</span></td>
+                        <td>₹{{ "{:,.0f}".format(policy.deductible) }}</td>
+                        <td><span class="text-truncate d-inline-block" style="max-width:120px;" title="{{ policy.occupation }}">{{ policy.occupation }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2"><div class="progress-bar bg-{{ 'danger' if policy.risk_score > 70 else 'warning' if policy.risk_score > 30 else 'success' }}" style="width:{{ policy.risk_score }}%"></div></div>
+                                <span>{{ policy.risk_score }}%</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-{{ 'danger' if policy.risk_level == 'High' else 'warning' if policy.risk_level == 'Medium' else 'success' }}">{{ policy.risk_level }}</span></td>
+                        <td class="text-center text-muted">{{ policy.updated_at.strftime("%b %d, %Y") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+{% endblock %}
+{% endblock %}

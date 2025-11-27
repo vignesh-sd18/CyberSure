@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Policy Management Dashboard - Cyber Insurance{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+   
+
+    
+
+ 
+    <div id="createForm" class="card shadow-sm mb-5 border-0">
+        <div class="card-body">
+            <h5 class="card-title fw-bold text-secondary mb-3 text-center">Create New Policy</h5> <hr>
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="account_policy" class="form-label">Account Policy</label>
+                        <input type="text" class="form-control" id="account_policy" name="account_policy"
+                            placeholder="Enter account policy" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="policy_name" class="form-label">Policy Name</label>
+                        <input type="text" class="form-control" id="policy_name" name="policy_name"
+                            placeholder="Enter policy name" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"
+                            placeholder="Enter description"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="start_risk" class="form-label">Start Level</label>
+                        <input type="number" step="0.01" class="form-control" id="start_risk" name="start_risk"
+                            placeholder="Enter start risk" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="end_risk" class="form-label">End Level</label>
+                        <input type="number" step="0.01" class="form-control" id="end_risk" name="end_risk"
+                            placeholder="Enter end risk" required>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex justify-content-center">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                        <i class="fa fa-paper-plane me-2"></i> Create Entry
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Display all entries -->
+    <div class="table-responsive shadow-sm rounded-3 border-0">
+        <table class="table table-hover align-middle text-center mb-0">
+            <thead class="table-primary text-uppercase small fw-bold">
+                <tr>
+                    <th>ID</th>
+                    <th>Account Policy</th>
+                    <th>Policy Name</th>
+                    <th>Description</th>
+                    <th>Start Risk</th>
+                    <th>End Risk</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in entries %}
+                <tr class="align-middle">
+                    <td>{{ entry.id }}</td>
+                    <td class="fw-semibold text-secondary">{{ entry.account_policy }}</td>
+                    <td class="fw-semibold text-secondary">{{ entry.policy_name }}</td>
+                    <td>{{ entry.description or '-' }}</td>
+                    <td class="text-success fw-bold">{{ entry.start_risk }}</td>
+                    <td class="text-danger fw-bold">{{ entry.end_risk }}</td>
+                    <td class="text-muted">{{ entry.date.strftime('%d %b %Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Bootstrap Icons & Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body {
+        background-color: #f7f9fc;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #6f42c1, #6610f2);
+        color: white;
+    }
+
+    .btn-gradient:hover {
+        background: linear-gradient(135deg, #6610f2, #6f42c1);
+    }
+
+    table thead {
+        border-radius: 0.5rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+
+{% endblock %}

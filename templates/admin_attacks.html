@@ -1,0 +1,244 @@
+<!-- templates/admin_attacks.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-shield-alt me-3" style="color: var(--primary);"></i>Security Threats Log
+                </h1>
+                <p class="text-muted">Monitor SQL injection attempts, brute force attacks, and suspicious activities</p>
+            </div>
+            <div class="text-end">
+                <div class="stats-card p-3 rounded-3" style="background: linear-gradient(135deg, rgba(26, 35, 126, 0.1) 0%, rgba(0, 172, 193, 0.1) 100%); border: 1px solid rgba(26, 35, 126, 0.15);">
+                    <div class="h5 mb-1">Total Threats</div>
+                    <div class="display-6" style="color: var(--primary);">{{ entries|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if entries %}
+    <!-- Threats Table -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-clock me-2"></i>Time (UTC)
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-route me-2"></i>Endpoint
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-field me-2"></i>Field
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-search me-2"></i>Detected Pattern
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-user me-2"></i>User ID
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-network-wired me-2"></i>IP Address
+                        </th>
+                        <th class="text-muted fw-600">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Threat Type
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in entries %}
+                    <tr class="threat-row" data-threat="{{ e.value_masked }}">
+                        <td>
+                            <small class="text-muted">{{ e.timestamp }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark fw-600">{{ e.route }}</span>
+                        </td>
+                        <td>
+                            <code class="bg-light p-2 rounded">{{ e.field }}</code>
+                        </td>
+                        <td>
+                            <span class="font-monospace text-warning" style="font-size: 0.85rem;">{{ e.value_masked[:40] }}{% if e.value_masked|length > 40 %}...{% endif %}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info text-white">{{ e.user_id or 'Anonymous' }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary text-white" style="font-family: monospace; font-size: 0.8rem;">{{ e.ip }}</span>
+                        </td>
+                        <td>
+                            {% if 'sql' in e.value_masked.lower() or 'drop' in e.value_masked.lower() or 'union' in e.value_masked.lower() %}
+                                <span class="badge bg-danger" title="SQL Injection Attempt">
+                                    <i class="fas fa-database me-1"></i>SQL Injection
+                                </span>
+                            {% elif 'select' in e.value_masked.lower() or 'insert' in e.value_masked.lower() or 'delete' in e.value_marked.lower() %}
+                                <span class="badge bg-danger" title="Database Query Injection">
+                                    <i class="fas fa-database me-1"></i>DB Injection
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark" title="Suspicious Input Detected">
+                                    <i class="fas fa-exclamation-circle me-1"></i>Suspicious
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-4 g-3">
+        <div class="col-md-6 col-lg-4">
+            <div class="alert alert-danger border-0 rounded-3 d-flex align-items-center">
+                <i class="fas fa-database me-2" style="font-size: 1.5rem;"></i>
+                <div>
+                    <strong>SQL Injection</strong>
+                    <br><small>Detected malicious database queries</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="alert alert-warning border-0 rounded-3 d-flex align-items-center">
+                <i class="fas fa-lock-open me-2" style="font-size: 1.5rem;"></i>
+                <div>
+                    <strong>Brute Force</strong>
+                    <br><small>Multiple failed login attempts</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="alert alert-info border-0 rounded-3 d-flex align-items-center">
+                <i class="fas fa-shield-alt me-2" style="font-size: 1.5rem;"></i>
+                <div>
+                    <strong>Suspicious Input</strong>
+                    <br><small>Anomalous patterns detected</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-success border-0 rounded-3 p-4 text-center">
+        <i class="fas fa-shield-check fa-3x mb-3" style="color: var(--success);"></i>
+        <h4 class="mb-2">All Clear!</h4>
+        <p class="text-muted mb-0">No suspicious attempts or threats detected. Your system is secure.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Page layout */
+    .page-header {
+        padding: 2rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(26, 35, 126, 0.02);
+    }
+
+    .threat-row {
+        transition: all 0.2s ease;
+    }
+
+    .threat-row:hover {
+        box-shadow: inset 0 0 20px rgba(26, 35, 126, 0.05);
+    }
+
+    .stats-card {
+        min-width: 200px;
+    }
+
+    /* Badges */
+    .badge {
+        font-weight: 600;
+        padding: 0.35rem 0.7rem;
+        border-radius: 6px;
+    }
+
+    /* Detected pattern text (make SQL patterns prominent) */
+    .font-monospace.text-warning {
+        color: var(--danger) !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', monospace;
+        font-size: 0.9rem;
+        letter-spacing: 0.2px;
+    }
+
+    code {
+        font-size: 0.85rem;
+        word-break: break-all;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+        background-color: transparent;
+        padding: 1rem;
+    }
+
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Legend alert colors and text color adjustments */
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(215, 63, 63, 0.12), rgba(215, 63, 63, 0.06));
+        color: #7f1d1d; /* darker red text for legibility */
+        border-left: 4px solid rgba(215, 63, 63, 0.9);
+    }
+
+    .alert-danger strong {
+        color: #7f1d1d;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 243, 205, 0.6), rgba(255, 243, 205, 0.3));
+        color: #5f3b00; /* dark amber */
+        border-left: 4px solid rgba(255, 193, 7, 0.9);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(209, 236, 241, 0.6), rgba(209, 236, 241, 0.3));
+        color: #064e63; /* teal-blue */
+        border-left: 4px solid rgba(3, 169, 244, 0.9);
+    }
+
+    /* Threat badges styling */
+    .badge.bg-danger {
+        background: linear-gradient(90deg, #c62828, #8e0000) !important;
+        color: #fff !important;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(90deg, #fff3cd, #ffe8a1) !important;
+        color: #5f3b00 !important;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(90deg, #cfeefb, #a9e0f7) !important;
+        color: #043a52 !important;
+    }
+
+    @media (max-width: 768px) {
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .display-6 {
+            font-size: 2rem !important;
+        }
+
+        .stats-card {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}

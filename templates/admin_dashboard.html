@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - CyberSure{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+    :root{
+        --primary:#1e40af;--primary-light:#3b82f6;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+        --text-primary:#1f2937;--text-secondary:#6b7280;--surface:#f9fafb;--border:#e2e8f0;
+    }
+
+    .admin-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        background: var(--surface);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        color: var(--text-primary);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .info-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-top: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .info-section-header h3 {
+        font-size: 1.25rem;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .btn-custom {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30,58,138,0.3);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-table th {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .data-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .verified { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+    .not-verified { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+
+    @media (max-width: 768px) {
+        .admin-container { padding: 1.5rem; }
+        .data-table { font-size: 0.9rem; }
+        .data-table th, .data-table td { padding: 0.75rem; }
+    }
+</style>
+
+<div class="admin-container">
+    <div class="page-header">
+        <h2>Admin Dashboard</h2>
+        <p>Manage users, verify KYC, and monitor platform activity</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="mb-0">Welcome, <strong>{{ current_user.username }}</strong> ({{ current_user.role }})</p>
+        <div>
+            <a href="{{ url_for('admin_policies') }}" class="btn-custom me-2">View Policies</a>
+            <a href="{{ url_for('logout') }}" class="btn-custom">Logout</a>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-section-header">
+            <h3>All Users</h3>
+            <span class="badge bg-primary-soft text-primary px-3 py-1 rounded-pill">{{ users|length }} Total</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Wallet Address</th>
+                        <th>KYC Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><strong>#{{ user.id }}</strong></td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td><code style="font-size:0.8rem;">{{ user.wallet_address[:10] }}...{{ user.wallet_address[-6:] }}</code></td>
+                        <td>
+                            <span class="status-badge {% if user.kyc_verified %}verified{% else %}not-verified{% endif %}">
+                                {{ "Verified" if user.kyc_verified else "Pending" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if not user.kyc_verified %}
+                            <a href="{{ url_for('verify_kyc', user_id=user.id) }}" class="btn btn-success btn-sm">Verify KYC</a>
+                            {% else %}
+                            <span class="text-success">Verified</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+{% endblock %}
+{% endblock %}

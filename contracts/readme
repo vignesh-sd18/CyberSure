@@ -1,0 +1,10 @@
+
+https://archive.trufflesuite.com/ganache/
+https://developer.metamask.io/
+
+
+step 1) npm install -g ganache
+
+step 2) ganache
+
+step 3) pip install py-solc-x

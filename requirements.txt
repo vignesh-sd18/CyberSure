@@ -1,0 +1,22 @@
+# Requirements for Block-chain Powered Cyber Risk Prediction
+# Core web framework
+Flask
+Flask-Login
+Flask-SQLAlchemy
+
+# Database / ORM
+SQLAlchemy
+
+# Blockchain / Solidity
+web3
+eth-account
+py-solc-x
+
+# Data / ML
+numpy
+pandas
+scikit-learn
+matplotlib
+
+# Utilities
+requests

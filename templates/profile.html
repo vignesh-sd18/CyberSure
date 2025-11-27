@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% block title %}Profile - CyberSure{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+    :root{
+        --primary:#1e40af;--primary-light:#3b82f6;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+        --text-primary:#1f2937;--text-secondary:#6b7280;--surface:#f9fafb;--border:#e2e8f0;
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        background: var(--surface);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        color: var(--text-primary);
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+    }
+
+    .page-header p {
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .info-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-top: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .info-section-header i {
+        font-size: 1.5rem;
+        color: var(--primary);
+        margin-right: 1rem;
+    }
+
+    .info-section-header h3 {
+        font-size: 1.25rem;
+        margin: 0;
+        color: var(--text-primary);
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-item {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary);
+        transition: all 0.3s ease;
+    }
+
+    .profile-item:hover {
+        background: #eef2ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .profile-item strong {
+        color: var(--primary);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .profile-item span {
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .kyc-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .kyc-verified {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--success);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .kyc-pending {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Table Styling */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-table th {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.95rem;
+    }
+
+    .data-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .data-table .status {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container { padding: 1.5rem; }
+        .profile-grid { grid-template-columns: 1fr; }
+        .data-table { font-size: 0.9rem; }
+        .data-table th, .data-table td { padding: 0.75rem; }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="page-header">
+        <h2>My Profile</h2>
+        <p>View your account details, KYC status, and insurance history</p>
+    </div>
+
+    <!-- User Info Section -->
+    <div class="info-section">
+        <div class="info-section-header">
+            <h3>User Information</h3>
+        </div>
+
+        <div class="profile-grid">
+            <div class="profile-item">
+                <strong>Username</strong>
+                <span>{{ user.username }}</span>
+            </div>
+            <div class="profile-item">
+                <strong>Email</strong>
+                <span>{{ user.email }}</span>
+            </div>
+            <div class="profile-item">
+                <strong>Wallet Address</strong>
+                <span class="font-monospace" style="font-size:0.9rem; word-break:break-all;">{{ user.wallet_address }}</span>
+            </div>
+            <div class="profile-item">
+                <strong>KYC Status</strong>
+                <span class="kyc-badge {% if user.kyc_verified %}kyc-verified{% else %}kyc-pending{% endif %}">
+                    {{ "Verified" if user.kyc_verified else "Pending" }}
+                </span>
+            </div>
+            <div class="profile-item">
+                <strong>Member Since</strong>
+                <span>{{ user.created_at.strftime("%B %d, %Y") }}</span>
+            </div>
+            <div class="profile-item">
+                <strong>Registered On</strong>
+                <span>{{ user.created_at.strftime("%Y-%m-%d %H:%M") }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policies Section -->
+    <div class="info-section">
+        <div class="info-section-header">
+            <h3>My Insurance Policies</h3>
+        </div>
+
+        {% if policies %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Coverage</th>
+                    <th>Premium</th>
+                    <th>Deductible</th>
+                    <th>Risk Level</th>
+                    <th>Risk Score</th>
+                    <th>Contract</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in policies %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>₹{{ policy.coverage_amount }}</strong></td>
+                    <td>₹{{ policy.premium_amount }}/mo</td>
+                    <td>₹{{ policy.deductible }}</td>
+                    <td>
+                        <span class="status" style="background:rgba({% if policy.risk_level == 'Low' %}16,185,129{% elif policy.risk_level == 'Medium' %}245,158,11{% else %}239,68,68{% endif %},0.15); color:{% if policy.risk_level == 'Low' %}#10b981{% elif policy.risk_level == 'Medium' %}#f59e0b{% else %}#ef4444{% endif %}; border:1px solid rgba({% if policy.risk_level == 'Low' %}16,185,129{% elif policy.risk_level == 'Medium' %}245,158,11{% else %}239,68,68{% endif %},0.3);">
+                            {{ policy.risk_level }}
+                        </span>
+                    </td>
+                    <td>{{ policy.risk_score }}%</td>
+                    <td>
+                        <code style="font-size:0.8rem; background:#f3f4f6; padding:0.25rem 0.5rem; border-radius:4px;">
+                            {{ policy.blockchain_txn[:10] }}...{{ policy.blockchain_txn[-6:] }}
+                        </code>
+                    </td>
+                    <td>{{ policy.created_at.strftime("%b %d, %Y") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">No insurance policies found. Complete risk assessment to get started.</p>
+        {% endif %}
+    </div>
+
+    <!-- Bookings Section -->
+    <div class="info-section">
+        <div class="info-section-header">
+            <h3>My Bookings</h3>
+        </div>
+
+        {% if bookings %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Policy Name</th>
+                    <th>Booking Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ booking.policy_name }}</strong></td>
+                    <td>{{ booking.booking_date.strftime("%b %d, %Y at %I:%M %p") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-data">No bookings yet. Your upcoming consultations will appear here.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Optional: Add smooth reveal on scroll
+    const cards = document.querySelectorAll('.info-section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

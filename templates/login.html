@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% block title %}Login - CyberSure{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #1e40af;
+        --primary-light: #3b82f6;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --surface: #f8fafc;
+        --card-bg: #ffffff;
+        --border: #e2e8f0;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Background */
+    .login-wrapper {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Login Card */
+    .login-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        border-radius: 20px 20px 0 0;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Logo */
+    .logo {
+        text-align: center;
+        margin-bottom: 1.8rem;
+    }
+
+    .logo i {
+        font-size: 2.8rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .logo h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .logo p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-top: 0.3rem;
+    }
+
+    /* Header */
+    .form-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-title h2 {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
+        font-size: 1.6rem;
+    }
+
+    .form-title p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    /* Form */
+    .form-group {
+        margin-bottom: 1.4rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.94rem;
+        display: block;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 0.85rem 1rem 0.85rem 2.8rem;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fdfdfe;
+    }
+
+    .input-group input:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        background: white;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 0.95rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    /* Button */
+    .login-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        color: white;
+        border: none;
+        padding: 0.9rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+        border-radius: 12px;
+        width: 100%;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 18px rgba(30, 64, 138, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(30, 64, 138, 0.35);
+    }
+
+    .login-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .login-btn .spinner {
+        width: 1.1rem;
+        height: 1.1rem;
+    }
+
+    /* Links */
+    .register-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.94rem;
+        color: var(--text-secondary);
+    }
+
+    .register-link a {
+        color: var(--primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .register-link a:hover {
+        color: var(--primary-light);
+        text-decoration: underline;
+    }
+
+    /* Security Badge */
+    .security-badge {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: var(--success);
+        font-size: 0.82rem;
+        padding: 0.65rem 1rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .security-badge i {
+        font-size: 0.9rem;
+    }
+
+    /* Flash Messages */
+    .alert {
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success { background: rgba(16, 185, 129, 0.08); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .alert-danger {
+        background: linear-gradient(135deg, rgba(215,63,63,0.12), rgba(215,63,63,0.06));
+        color: #7f1d1d;
+        border-left: 4px solid #b91c1c;
+        box-shadow: 0 4px 12px rgba(185,28,28,0.06);
+    }
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255,243,205,0.6), rgba(255,243,205,0.3));
+        color: #7a4a00;
+        border-left: 4px solid #f59e0b;
+        box-shadow: 0 4px 12px rgba(245,158,11,0.06);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .login-card {
+            padding: 2rem 1.5rem;
+            border-radius: 16px;
+        }
+        .logo i { font-size: 2.3rem; }
+        .logo h1 { font-size: 1.5rem; }
+    }
+</style>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <!-- Logo -->
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+            <h1>CyberSure</h1>
+            <p>Enterprise Cyber Insurance</p>
+        </div>
+
+        <!-- Title -->
+        <div class="form-title">
+            <h2>Sign In</h2>
+            <p>Access your secure dashboard</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'warning' if category == 'warning' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form -->
+        <form method="POST" action="{{ url_for('login') }}" id="login-form">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-group">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" name="email" placeholder="you@company.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-group">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn" id="login-btn">
+                <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                <span id="btn-text">Sign In</span>
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="register-link">
+            New here? <a href="{{ url_for('register') }}">Create an account</a>
+        </div>
+
+        <!-- Security Badge -->
+        <div class="security-badge">
+            <i class="fas fa-lock"></i>
+            Secured with 256-bit SSL Encryption
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('login-form').addEventListener('submit', function() {
+        const btn = document.getElementById('login-btn');
+        const spinner = btn.querySelector('.spinner-border');
+        const text = document.getElementById('btn-text');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        text.textContent = 'Signing in...';
+    });
+</script>
+{% endblock %}
