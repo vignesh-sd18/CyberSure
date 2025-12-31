@@ -139,4 +139,4 @@ If you'd like, I can:
 - Move ML models into LFS and rewrite history to avoid large pushes
 - Add a simple `run_local.ps1` script to spawn Ganache & run the Flask app together
 
-Tell me which of the above you want next and I’ll implement it.
+Tell me which of the above you want next and I’ll implement it..
